@@ -60,14 +60,14 @@
             v-for="button in getButtons"
             :key="button.name"
           >
-            <a
+            <div
               class="link"
+              @click="onButton"
               :class="{ 'not-allowed': isButtonDisabled }"
-              :href="vkLink"
             >
               <img class="logo" :src="getLogo(button.name)" alt="" />
               <div class="text">{{ getButtonText(button.name) }}</div>
-            </a>
+            </div>
           </div>
         </div>
         <div class="agreement" :class="{ 'not-agreement': !agreement }">
@@ -111,6 +111,7 @@ export default {
       this.loader = false;
     } else {
       const uid = params.ml;
+      this.hash = params.hash;
       try {
         const response = await fetch(`${this.api}/mini-landing/${uid}`);
         this.ml = await response.json();
@@ -131,6 +132,7 @@ export default {
   data() {
     return {
       ml: null,
+      hash: null,
       loader: true,
       description: '',
       api: 'https://prosto.bz/api',
@@ -178,10 +180,19 @@ export default {
       return this.ml?.buttons?.length ? this.ml.buttons : [];
     },
     isButtonDisabled() {
-      return this.isInvalidPhone || this.isInvalidEmail || !this.agreement;
+      return (
+        (this.isInvalidPhone && this.ml.additionalOptions.showPhone) ||
+        (this.isInvalidEmail && this.ml.additionalOptions.showEmail) ||
+        !this.agreement
+      );
     },
   },
   methods: {
+    onButton() {
+      if (!this.isButtonDisabled) {
+        window.top.location.href = this.vkLink;
+      }
+    },
     getQuery(href) {
       let result = {};
       if (href.includes('#')) {
@@ -222,18 +233,14 @@ export default {
       const clearPhone = this.phone.replace(/[^\d]/g, '');
       this.phoneNumberLength = clearPhone.length;
       this.isInvalidPhone = this.phoneNumberLength < 11;
-      if (!this.isInvalidPhone && !this.isInvalidEmail) {
-        this.getInfo();
-      }
+      this.getInfo();
     },
     onInputEmail() {
       const pattern =
         /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
       this.emailAttributes = pattern.test(this.email);
       this.isInvalidEmail = !this.emailAttributes;
-      if (!this.isInvalidPhone && !this.isInvalidEmail) {
-        this.getInfo();
-      }
+      this.getInfo();
     },
     async postData() {
       const data = {
@@ -254,11 +261,13 @@ export default {
       }
     },
     getInfo() {
-      this.postData().then((data) => {
-        if (typeof data === 'string') {
-          this.vkLink = `${this.vkUrl}im?sel=-${this.ml.buttons[0].botIdInSocialNetwork}&start=${data}`;
-        }
-      });
+      if (!this.isInvalidPhone || !this.isInvalidEmail) {
+        this.postData().then((data) => {
+          if (typeof data === 'string') {
+            this.vkLink = `${this.vkUrl}im?sel=-${this.ml.buttons[0].botIdInSocialNetwork}&start=${this.hash}`;
+          }
+        });
+      }
     },
     getLogo(name) {
       let logo;
@@ -413,6 +422,7 @@ export default {
             flex-direction: column;
             align-items: center;
             padding: 5px 10px;
+            cursor: pointer;
             &.not-allowed {
               cursor: not-allowed;
             }
