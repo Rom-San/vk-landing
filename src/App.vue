@@ -131,8 +131,9 @@ export default {
     if (bridge.supports('VKWebAppResizeWindow')) {
       console.log('document >>>', { document });
       const offsetHeight = document.body.offsetHeight;
-      const height = offsetHeight < 8050 ? offsetHeight : 8050;
-      bridge.send('VKWebAppResizeWindow', { height });
+      const appHeight = offsetHeight < 8050 ? offsetHeight : 8050;
+      console.log('🚀 appHeight', appHeight);
+      bridge.send('VKWebAppResizeWindow', { height: appHeight });
     }
   },
   data() {
