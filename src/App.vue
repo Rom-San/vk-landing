@@ -52,7 +52,6 @@
         </div>
       </div>
       <div class="footer">
-        <div class="label">Выберите мессенджер</div>
         <div class="buttons">
           <div
             class="button"
@@ -65,8 +64,7 @@
               @click="onButton"
               :class="{ 'not-allowed': isButtonDisabled }"
             >
-              <img class="logo" :src="getLogo(button.name)" alt="" />
-              <div class="text">{{ getButtonText(button.name) }}</div>
+              <div class="text">Подписаться</div>
             </div>
           </div>
         </div>
@@ -96,7 +94,7 @@
 import { mask } from 'vue-the-mask';
 import PhoneIcon from './assets/images/phone.svg';
 import EmailIcon from './assets/images/mail.svg';
-import VK from './assets/images/vk.svg';
+import bridge from '@vkontakte/vk-bridge';
 import vkPixel from './scripts/vk-pixel';
 
 export default {
@@ -129,6 +127,11 @@ export default {
       }
     }
   },
+  mounted() {
+    if (bridge.supports('VKWebAppResizeWindow')) {
+      bridge.send('VKWebAppResizeWindow', { height: '100%' });
+    }
+  },
   data() {
     return {
       ml: null,
@@ -138,6 +141,7 @@ export default {
       api: 'https://prosto.bz/api',
       vkUrl: 'https://vk.com/',
       youtubeUrl: 'https://www.youtube.com/embed',
+      vkUserEnter: 'https://prosto.bz/ws/vk-user-enter',
       isInvalidPhone: true,
       isInvalidEmail: true,
       phone: null,
@@ -260,8 +264,9 @@ export default {
         console.log(error.message);
       }
     },
-    getInfo() {
+    async getInfo() {
       if (!this.isInvalidPhone || !this.isInvalidEmail) {
+        await this.allowMessages();
         this.postData().then((data) => {
           if (typeof data === 'string') {
             this.vkLink = `${this.vkUrl}im?sel=-${this.ml.buttons[0].botIdInSocialNetwork}&start=${this.hash}`;
@@ -269,29 +274,14 @@ export default {
         });
       }
     },
-    getLogo(name) {
-      let logo;
-      switch (name) {
-        case 'Vkontakte':
-          logo = VK;
-          break;
-
-        default:
-          break;
+    async allowMessages() {
+      try {
+        return await bridge.send('VKWebAppAllowMessagesFromGroup', {
+          group_id: groupId,
+        });
+      } catch (e) {
+        return await this.allowMessages();
       }
-      return logo;
-    },
-    getButtonText(name) {
-      let text;
-      switch (name) {
-        case 'Vkontakte':
-          text = 'Вконтакте';
-          break;
-
-        default:
-          break;
-      }
-      return text;
     },
   },
 };
@@ -397,15 +387,7 @@ export default {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin: 12px 0;
-      .label {
-        position: relative;
-        top: -12px;
-        padding: 5px 7px;
-        background-color: #fff;
-        color: #687397;
-        font-size: 12px;
-      }
+      padding: 12px 0;
       .buttons {
         display: flex;
         justify-content: center;
@@ -421,7 +403,7 @@ export default {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 5px 10px;
+            padding: 10px;
             cursor: pointer;
             &.not-allowed {
               cursor: not-allowed;
@@ -431,7 +413,6 @@ export default {
             }
             .text {
               font-size: 14px;
-              margin-bottom: 12px;
               color: #ffffff;
             }
           }
