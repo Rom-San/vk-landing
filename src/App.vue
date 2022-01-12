@@ -17,7 +17,16 @@
         <div class="content">
           <div class="text">{{ getText }}</div>
           <form class="form">
-            <div class="label">Обязательные поля для заполнения</div>
+            <div
+              v-if="
+                ml &&
+                (ml.additionalOptions.showPhone ||
+                  ml.additionalOptions.showEmail)
+              "
+              class="label"
+            >
+              Обязательные поля для заполнения
+            </div>
             <div
               v-if="ml && ml.additionalOptions.showPhone"
               class="input-block"
@@ -49,25 +58,25 @@
               />
             </div>
           </form>
-        </div>
-      </div>
-      <div class="footer">
-        <div class="buttons">
-          <div
-            class="button"
-            :class="{ disabled: isButtonDisabled }"
-            v-for="button in getButtons"
-            :key="button.name"
-          >
+          <div class="buttons">
             <div
-              class="link"
-              @click="onButton"
-              :class="{ 'not-allowed': isButtonDisabled }"
+              class="button"
+              :class="{ disabled: isButtonDisabled }"
+              v-for="button in getButtons"
+              :key="button.name"
             >
-              <div class="text">Подписаться</div>
+              <div
+                class="link"
+                @click="onButton"
+                :class="{ 'not-allowed': isButtonDisabled }"
+              >
+                <div class="text">Подписаться</div>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+      <div class="footer">
         <div class="agreement" :class="{ 'not-agreement': !agreement }">
           <input type="checkbox" v-model="agreement" />
           Вы соглашаетесь с&nbsp;
@@ -103,13 +112,13 @@ export default {
   },
   async created() {
     const href = window.location.href;
-    console.log('🚀 ~ search', href);
-    const params = this.getQuery(href);
-    if (!params) {
+    console.log('🚀 ~ search', window.location);
+    this.params = this.getQuery(href);
+    if (!this.params) {
       this.loader = false;
     } else {
-      const uid = params.ml;
-      this.hash = params.hash;
+      const uid = this.params.ml;
+      this.hash = this.params.hash;
       try {
         const response = await fetch(`${this.api}/mini-landing/${uid}`);
         this.ml = await response.json();
@@ -129,17 +138,16 @@ export default {
   },
   mounted() {
     if (bridge.supports('VKWebAppResizeWindow')) {
-      console.log('document >>>', { document });
       setTimeout(() => {
         const offsetHeight = document.body.offsetHeight;
         const appHeight = offsetHeight < 8050 ? offsetHeight : 8050;
-        console.log('🚀 appHeight', appHeight);
         bridge.send('VKWebAppResizeWindow', { height: appHeight });
       }, 1000);
     }
   },
   data() {
     return {
+      params: null,
       ml: null,
       hash: null,
       loader: true,
@@ -198,9 +206,20 @@ export default {
     },
   },
   methods: {
-    onButton() {
+    async onButton() {
       if (!this.isButtonDisabled) {
-        window.top.location.href = this.vkLink;
+        await this.postData();
+        const allowMessages = await this.allowMessages();
+        console.log('🚀 allowMessages', allowMessages);
+        const res = await bridge.send('VKWebAppGetUserInfo');
+        await fetch(vkUserEnter, {
+          method: 'post',
+          body: JSON.stringify({ ...res, ...this.params }),
+          headers: { 'Content-Type': 'application/json' },
+        });
+        this.vkLink = `${this.vkUrl}im?sel=-${this.ml.buttons[0].botIdInSocialNetwork}`;
+        console.log('🚀 ~ onButton ~ this.vkLink', this.vkLink);
+        //window.top.location.href = this.vkLink;
       }
     },
     getQuery(href) {
@@ -243,14 +262,12 @@ export default {
       const clearPhone = this.phone.replace(/[^\d]/g, '');
       this.phoneNumberLength = clearPhone.length;
       this.isInvalidPhone = this.phoneNumberLength < 11;
-      this.getInfo();
     },
     onInputEmail() {
       const pattern =
         /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
       this.emailAttributes = pattern.test(this.email);
       this.isInvalidEmail = !this.emailAttributes;
-      this.getInfo();
     },
     async postData() {
       const data = {
@@ -270,22 +287,20 @@ export default {
         console.log(error.message);
       }
     },
-    async getInfo() {
-      if (!this.isInvalidPhone || !this.isInvalidEmail) {
-        await this.allowMessages();
-        this.postData().then((data) => {
-          if (typeof data === 'string') {
-            this.vkLink = `${this.vkUrl}im?sel=-${this.ml.buttons[0].botIdInSocialNetwork}&start=${this.hash}`;
-          }
-        });
-      }
-    },
     async allowMessages() {
       try {
-        return await bridge.send('VKWebAppAllowMessagesFromGroup', {
-          group_id: groupId,
-        });
+        const groupId = parseInt(this.ml.buttons[0].botIdInSocialNetwork);
+        console.log('🚀 ~ groupId', groupId);
+        const allowMessages = await bridge.send(
+          'VKWebAppAllowMessagesFromGroup',
+          {
+            group_id: groupId,
+          }
+        );
+        console.log('🚀 ~ allowMessages', allowMessages);
+        return allowMessages;
       } catch (e) {
+        console.log('🚀 ~ allowMessages ~ e', e);
         return await this.allowMessages();
       }
     },
@@ -385,44 +400,46 @@ export default {
             }
           }
         }
+        .buttons {
+          display: flex;
+          justify-content: center;
+          width: 100%;
+          margin: 12px 0;
+          .button {
+            background: #0077ff;
+            border-radius: 16px;
+            &.disabled {
+              opacity: 0.5;
+            }
+            .link {
+              text-decoration: none;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              padding: 10px;
+              cursor: pointer;
+              &.not-allowed {
+                cursor: not-allowed;
+              }
+              .logo {
+                text-align: center;
+              }
+              .text {
+                font-size: 14px;
+                color: #ffffff;
+              }
+            }
+          }
+        }
       }
     }
     .footer {
       width: 100%;
       display: flex;
+      border-top: 1px solid #b3cce2;
       flex-direction: column;
       align-items: center;
       padding: 12px 0;
-      .buttons {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-        .button {
-          background: #0077ff;
-          border-radius: 16px;
-          &.disabled {
-            opacity: 0.5;
-          }
-          .link {
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px;
-            cursor: pointer;
-            &.not-allowed {
-              cursor: not-allowed;
-            }
-            .logo {
-              text-align: center;
-            }
-            .text {
-              font-size: 14px;
-              color: #ffffff;
-            }
-          }
-        }
-      }
       .agreement {
         display: flex;
         justify-content: center;
@@ -435,12 +452,15 @@ export default {
           margin: 0 12px;
         }
         a {
-          color: #574e72;
+          color: #769dc0;
         }
       }
       .made-in {
         margin: 12px 0;
         font-size: 12px;
+        a {
+          color: #769dc0;
+        }
       }
     }
   }
