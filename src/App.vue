@@ -208,17 +208,22 @@ export default {
   methods: {
     async onButton() {
       if (!this.isButtonDisabled) {
-        await this.postData();
-        const allowMessages = await this.allowMessages();
-        console.log('🚀 allowMessages', allowMessages);
-        const res = await bridge.send('VKWebAppGetUserInfo');
-        await fetch(vkUserEnter, {
-          method: 'post',
-          body: JSON.stringify({ ...res, ...this.params }),
-          headers: { 'Content-Type': 'application/json' },
-        });
-        this.vkLink = `${this.vkUrl}im?sel=-${this.ml.buttons[0].botIdInSocialNetwork}`;
-        console.log('🚀 ~ onButton ~ this.vkLink', this.vkLink);
+        try {
+          await this.postData();
+          const allowMessages = await this.allowMessages();
+          console.log('🚀 allowMessages', allowMessages);
+          const res = await bridge.send('VKWebAppGetUserInfo');
+          await fetch(this.vkUserEnter, {
+            method: 'post',
+            body: JSON.stringify({ ...res, ...this.params }),
+            headers: { 'Content-Type': 'application/json' },
+          });
+          this.vkLink = `${this.vkUrl}im?sel=-${this.ml.buttons[0].botIdInSocialNetwork}`;
+          console.log('🚀 ~ onButton ~ this.vkLink', this.vkLink);
+        } catch (error) {
+          console.log('Ошибка:', error);
+        }
+
         //window.top.location.href = this.vkLink;
       }
     },
