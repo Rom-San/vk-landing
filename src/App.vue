@@ -52,7 +52,6 @@
         </div>
       </div>
       <div class="footer">
-        <div class="label">Выберите мессенджер</div>
         <div class="buttons">
           <div
             class="button"
@@ -60,14 +59,13 @@
             v-for="button in getButtons"
             :key="button.name"
           >
-            <a
+            <div
               class="link"
+              @click="onButton"
               :class="{ 'not-allowed': isButtonDisabled }"
-              :href="vkLink"
             >
-              <img class="logo" :src="getLogo(button.name)" alt="" />
-              <div class="text">{{ getButtonText(button.name) }}</div>
-            </a>
+              <div class="text">Подписаться</div>
+            </div>
           </div>
         </div>
         <div class="agreement" :class="{ 'not-agreement': !agreement }">
@@ -96,7 +94,7 @@
 import { mask } from 'vue-the-mask';
 import PhoneIcon from './assets/images/phone.svg';
 import EmailIcon from './assets/images/mail.svg';
-import VK from './assets/images/vk.svg';
+import bridge from '@vkontakte/vk-bridge';
 import vkPixel from './scripts/vk-pixel';
 
 export default {
@@ -111,6 +109,7 @@ export default {
       this.loader = false;
     } else {
       const uid = params.ml;
+      this.hash = params.hash;
       try {
         const response = await fetch(`${this.api}/mini-landing/${uid}`);
         this.ml = await response.json();
@@ -128,14 +127,21 @@ export default {
       }
     }
   },
+  mounted() {
+    if (bridge.supports('VKWebAppResizeWindow')) {
+      bridge.send('VKWebAppResizeWindow', { height: '100%' });
+    }
+  },
   data() {
     return {
       ml: null,
+      hash: null,
       loader: true,
       description: '',
       api: 'https://prosto.bz/api',
       vkUrl: 'https://vk.com/',
       youtubeUrl: 'https://www.youtube.com/embed',
+      vkUserEnter: 'https://prosto.bz/ws/vk-user-enter',
       isInvalidPhone: true,
       isInvalidEmail: true,
       phone: null,
@@ -178,10 +184,19 @@ export default {
       return this.ml?.buttons?.length ? this.ml.buttons : [];
     },
     isButtonDisabled() {
-      return this.isInvalidPhone || this.isInvalidEmail || !this.agreement;
+      return (
+        (this.isInvalidPhone && this.ml.additionalOptions.showPhone) ||
+        (this.isInvalidEmail && this.ml.additionalOptions.showEmail) ||
+        !this.agreement
+      );
     },
   },
   methods: {
+    onButton() {
+      if (!this.isButtonDisabled) {
+        window.top.location.href = this.vkLink;
+      }
+    },
     getQuery(href) {
       let result = {};
       if (href.includes('#')) {
@@ -222,18 +237,14 @@ export default {
       const clearPhone = this.phone.replace(/[^\d]/g, '');
       this.phoneNumberLength = clearPhone.length;
       this.isInvalidPhone = this.phoneNumberLength < 11;
-      if (!this.isInvalidPhone && !this.isInvalidEmail) {
-        this.getInfo();
-      }
+      this.getInfo();
     },
     onInputEmail() {
       const pattern =
         /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
       this.emailAttributes = pattern.test(this.email);
       this.isInvalidEmail = !this.emailAttributes;
-      if (!this.isInvalidPhone && !this.isInvalidEmail) {
-        this.getInfo();
-      }
+      this.getInfo();
     },
     async postData() {
       const data = {
@@ -253,36 +264,24 @@ export default {
         console.log(error.message);
       }
     },
-    getInfo() {
-      this.postData().then((data) => {
-        if (typeof data === 'string') {
-          this.vkLink = `${this.vkUrl}im?sel=-${this.ml.buttons[0].botIdInSocialNetwork}&start=${data}`;
-        }
-      });
-    },
-    getLogo(name) {
-      let logo;
-      switch (name) {
-        case 'Vkontakte':
-          logo = VK;
-          break;
-
-        default:
-          break;
+    async getInfo() {
+      if (!this.isInvalidPhone || !this.isInvalidEmail) {
+        await this.allowMessages();
+        this.postData().then((data) => {
+          if (typeof data === 'string') {
+            this.vkLink = `${this.vkUrl}im?sel=-${this.ml.buttons[0].botIdInSocialNetwork}&start=${this.hash}`;
+          }
+        });
       }
-      return logo;
     },
-    getButtonText(name) {
-      let text;
-      switch (name) {
-        case 'Vkontakte':
-          text = 'Вконтакте';
-          break;
-
-        default:
-          break;
+    async allowMessages() {
+      try {
+        return await bridge.send('VKWebAppAllowMessagesFromGroup', {
+          group_id: groupId,
+        });
+      } catch (e) {
+        return await this.allowMessages();
       }
-      return text;
     },
   },
 };
@@ -388,15 +387,7 @@ export default {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin: 12px 0;
-      .label {
-        position: relative;
-        top: -12px;
-        padding: 5px 7px;
-        background-color: #fff;
-        color: #687397;
-        font-size: 12px;
-      }
+      padding: 12px 0;
       .buttons {
         display: flex;
         justify-content: center;
@@ -412,7 +403,8 @@ export default {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 5px 10px;
+            padding: 10px;
+            cursor: pointer;
             &.not-allowed {
               cursor: not-allowed;
             }
@@ -421,7 +413,6 @@ export default {
             }
             .text {
               font-size: 14px;
-              margin-bottom: 12px;
               color: #ffffff;
             }
           }
