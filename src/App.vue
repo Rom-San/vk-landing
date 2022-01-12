@@ -386,7 +386,6 @@ export default {
     }
     .footer {
       width: 100%;
-      border-top: 1px solid #687397;
       display: flex;
       flex-direction: column;
       align-items: center;
