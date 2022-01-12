@@ -129,7 +129,8 @@ export default {
   },
   mounted() {
     if (bridge.supports('VKWebAppResizeWindow')) {
-      bridge.send('VKWebAppResizeWindow', { height: '100%' });
+      console.log(document.offsetHeight);
+      bridge.send('VKWebAppResizeWindow', { height: document.offsetHeight });
     }
   },
   data() {
