@@ -130,10 +130,12 @@ export default {
   mounted() {
     if (bridge.supports('VKWebAppResizeWindow')) {
       console.log('document >>>', { document });
-      const offsetHeight = document.body.offsetHeight;
-      const appHeight = offsetHeight < 8050 ? offsetHeight : 8050;
-      console.log('🚀 appHeight', appHeight);
-      bridge.send('VKWebAppResizeWindow', { height: appHeight });
+      setTimeout(() => {
+        const offsetHeight = document.body.offsetHeight;
+        const appHeight = offsetHeight < 8050 ? offsetHeight : 8050;
+        console.log('🚀 appHeight', appHeight);
+        bridge.send('VKWebAppResizeWindow', { height: appHeight });
+      }, 1000);
     }
   },
   data() {
