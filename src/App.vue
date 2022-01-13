@@ -9,7 +9,7 @@
           width="585"
           :src="getVideo"
           frameborder="0"
-          allowfullscreen
+          allow="autoplay; encrypted-media; fullscreen;"
         ></iframe>
       </div>
       <div class="container">
@@ -156,6 +156,7 @@ export default {
       vkUrl: 'https://vk.com/',
       youtubeUrl: 'https://www.youtube.com/embed',
       vkUserEnter: 'https://prosto.bz/ws/vk-user-enter',
+      vkVideoUrl: 'https://vk.com/video_ext.php?oid=',
       isInvalidPhone: true,
       isInvalidEmail: true,
       phone: null,
@@ -175,12 +176,19 @@ export default {
     getVideo() {
       let result;
       const link = this.ml.content.video;
+      const ytExt = '?controls=0&modestbranding=1&showinfo=0&rel=0';
       if (link.includes('https://youtube.com')) {
-        result = link.replace('watch?v=', 'embed/');
-      } else {
-        result = link.replace('https://youtu.be', this.youtubeUrl);
+        result = link.replace('watch?v=', 'embed/') + ytExt;
       }
-      return result + '?controls=0&modestbranding=1&showinfo=0&rel=0';
+      if (link.includes('https://youtu.be')) {
+        result = link.replace('https://youtu.be', this.youtubeUrl) + ytExt;
+      }
+      if (link.includes('https://vk.com')) {
+        const vkExt = link.replace('https://vk.com/video', '').split('_');
+        result = `${this.vkVideoUrl}${vkExt[0]}&id=${vkExt[1]}&hash=1b4beb5bfd0602dd`;
+      }
+      console.log('🚀 ~ getVideo ~ result', result);
+      return result;
     },
     getTitle() {
       return this.ml?.content ? this.ml.content.title : '';
