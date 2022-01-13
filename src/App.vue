@@ -105,20 +105,19 @@ import PhoneIcon from './assets/images/phone.svg';
 import EmailIcon from './assets/images/mail.svg';
 import bridge from '@vkontakte/vk-bridge';
 import vkPixel from './scripts/vk-pixel';
+import qs from 'query-string';
 
 export default {
   directives: {
     mask,
   },
   async created() {
-    const href = window.location.href;
-    console.log('🚀 ~ search', window.location);
-    this.params = this.getQuery(href);
-    if (!this.params) {
+    this.hash = qs.parse(location.hash);
+    this.search = qs.parse(location.search);
+    if (!this.search) {
       this.loader = false;
     } else {
-      const uid = this.params.ml;
-      this.hash = this.params.hash;
+      const uid = this.search.ml;
       try {
         const response = await fetch(`${this.api}/mini-landing/${uid}`);
         this.ml = await response.json();
@@ -147,7 +146,7 @@ export default {
   },
   data() {
     return {
-      params: null,
+      search: null,
       ml: null,
       hash: null,
       loader: true,
@@ -222,7 +221,7 @@ export default {
           const res = await bridge.send('VKWebAppGetUserInfo');
           await fetch(this.vkUserEnter, {
             method: 'post',
-            body: JSON.stringify({ ...res, ...this.params }),
+            body: JSON.stringify({ ...res, ...this.hash, ...this.hash }),
             headers: { 'Content-Type': 'application/json' },
           });
           console.log('🚀 ~ onButton ~ this.vkLink', this.vkLink);
