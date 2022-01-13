@@ -219,7 +219,7 @@ export default {
           const allowMessages = await this.allowMessages();
           console.log('🚀 allowMessages', allowMessages);
           const res = await bridge.send('VKWebAppGetUserInfo');
-          await fetch(this.vkUserEnter, {
+          await fetch(`${this.api}/vk-user-enter`, {
             method: 'post',
             body: JSON.stringify({ ...res, ...this.search, ...this.hash }),
             headers: { 'Content-Type': 'application/json' },
