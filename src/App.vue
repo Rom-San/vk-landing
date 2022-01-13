@@ -114,10 +114,10 @@ export default {
   async created() {
     this.hash = qs.parse(location.hash);
     this.search = qs.parse(location.search);
-    if (!this.search) {
+    if (!this.hash) {
       this.loader = false;
     } else {
-      const uid = this.search.ml;
+      const uid = this.hash.ml;
       try {
         const response = await fetch(`${this.api}/mini-landing/${uid}`);
         this.ml = await response.json();
