@@ -218,13 +218,12 @@ export default {
             body: JSON.stringify({ ...res, ...this.params }),
             headers: { 'Content-Type': 'application/json' },
           });
-          this.vkLink = `${this.vkUrl}im?sel=-${this.ml.buttons[0].botIdInSocialNetwork}`;
           console.log('🚀 ~ onButton ~ this.vkLink', this.vkLink);
         } catch (error) {
           console.log('Ошибка:', error);
         }
-
-        //window.top.location.href = this.vkLink;
+        this.vkLink = `${this.vkUrl}im?sel=-${this.ml.buttons[0].botIdInSocialNetwork}`;
+        window.top.location.href = this.vkLink;
       }
     },
     getQuery(href) {
