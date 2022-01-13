@@ -221,7 +221,7 @@ export default {
           const res = await bridge.send('VKWebAppGetUserInfo');
           await fetch(this.vkUserEnter, {
             method: 'post',
-            body: JSON.stringify({ ...res, ...this.hash, ...this.hash }),
+            body: JSON.stringify({ ...res, ...this.search, ...this.hash }),
             headers: { 'Content-Type': 'application/json' },
           });
           console.log('🚀 ~ onButton ~ this.vkLink', this.vkLink);
