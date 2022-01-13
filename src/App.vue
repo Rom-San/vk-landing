@@ -173,7 +173,7 @@ export default {
         ? `${this.api}/file/${this.ml.content.image[0]}`
         : '';
     },
-    getVideo() {
+    async getVideo() {
       let result;
       const link = this.ml.content.video;
       const ytExt = '?controls=0&modestbranding=1&showinfo=0&rel=0';
@@ -185,9 +185,8 @@ export default {
       }
       if (link.includes('https://vk.com')) {
         const vkExt = link.replace('https://vk.com/video', '').split('_');
-        result = `${this.vkVideoUrl}${vkExt[0]}&id=${vkExt[1]}&hash=1b4beb5bfd0602dd`;
+        result = `${this.vkVideoUrl}${vkExt[0]}&id=${vkExt[1]}`;
       }
-      console.log('🚀 ~ getVideo ~ result', result);
       return result;
     },
     getTitle() {
@@ -231,7 +230,7 @@ export default {
           console.log('Ошибка:', error);
         }
         this.vkLink = `${this.vkUrl}im?sel=-${this.ml.buttons[0].botIdInSocialNetwork}`;
-        window.top.location.href = this.vkLink;
+        //window.top.location.href = this.vkLink;
       }
     },
     getQuery(href) {
