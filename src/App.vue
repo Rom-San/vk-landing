@@ -154,7 +154,6 @@ export default {
       api: 'https://prosto.bz/api',
       vkUrl: 'https://vk.com/',
       youtubeUrl: 'https://www.youtube.com/embed',
-      vkUserEnter: 'https://prosto.bz/ws/vk-user-enter',
       vkVideoUrl: 'https://vk.com/video_ext.php?oid=',
       isInvalidPhone: true,
       isInvalidEmail: true,
@@ -217,19 +216,18 @@ export default {
         try {
           await this.postData();
           const allowMessages = await this.allowMessages();
-          console.log('🚀 allowMessages', allowMessages);
+          if (!allowMessages) return;
           const res = await bridge.send('VKWebAppGetUserInfo');
           await fetch(`${this.api}/vk-user-enter`, {
             method: 'post',
             body: JSON.stringify({ ...res, ...this.search, ...this.hash }),
             headers: { 'Content-Type': 'application/json' },
           });
-          console.log('🚀 ~ onButton ~ this.vkLink', this.vkLink);
         } catch (error) {
           console.log('Ошибка:', error);
         }
         this.vkLink = `${this.vkUrl}im?sel=-${this.ml.buttons[0].botIdInSocialNetwork}`;
-        //window.top.location.href = this.vkLink;
+        window.top.location.href = this.vkLink;
       }
     },
     getQuery(href) {
