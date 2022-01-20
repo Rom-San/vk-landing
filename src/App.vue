@@ -180,7 +180,7 @@ export default {
       this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
       console.log('🚀 ~ vkUserInfo', this.vkUserInfo);
       this.vkAuth = await bridge.send('VKWebAppGetAuthToken', {
-        app_id: parseInt(this.vkUserInfo.vk_app_id),
+        app_id: 7831726,
         scope: '',
       });
       console.log('🚀 ~ mounted ~ this.vkAuth', this.vkAuth);
