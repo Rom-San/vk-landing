@@ -145,19 +145,16 @@ export default {
         bridge.send('VKWebAppResizeWindow', { height: appHeight });
       }, 1000);
     }
-    const allowMessages = await this.allowMessages();
-    if (allowMessages) {
-      this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
-      console.log('🚀 ~ mounted ~ this.vkUserInfo', this.vkUserInfo);
-      const link = this.ml.content.video;
-      if (link.includes('https://vk.com')) {
-        const pattern = /(?!video)[\d-]+/g;
-        const ids = link.match(pattern);
-        const videos = await fetch(
-          `${vkApi}video.get?owner_id=${ids[0]}&videos=${ids[1]}&access_token=${this.vkUserInfo.access_token}`
-        );
-        console.log('🚀 ~ mounted ~ videos', videos);
-      }
+    this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
+    console.log('🚀 ~ mounted ~ this.vkUserInfo', this.vkUserInfo);
+    const link = this.ml.content.video;
+    if (link.includes('https://vk.com')) {
+      const pattern = /(?!video)[\d-]+/g;
+      const ids = link.match(pattern);
+      const videos = await fetch(
+        `${vkApi}video.get?owner_id=${ids[0]}&videos=${ids[1]}&access_token=${this.vkUserInfo.access_token}`
+      );
+      console.log('🚀 ~ mounted ~ videos', videos);
     }
   },
   data() {
