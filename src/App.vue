@@ -107,6 +107,7 @@ import EmailIcon from './assets/images/mail.svg';
 import bridge from '@vkontakte/vk-bridge';
 import vkPixel from './scripts/vk-pixel';
 import qs from 'query-string';
+import VK from 'https://vk.com/js/api/openapi.js?169';
 
 export default {
   directives: {
@@ -136,6 +137,7 @@ export default {
         this.loader = false;
         console.log(error.message);
       }
+      VK.init({ apiId: 7831726 });
     }
   },
   async mounted() {
@@ -178,7 +180,6 @@ export default {
   watch: {
     async groupId() {
       this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
-      console.log('🚀 ~ vkUserInfo', this.vkUserInfo);
       this.vkAuth = await bridge.send('VKWebAppGetAuthToken', {
         app_id: 7831726,
         scope: '',
@@ -188,9 +189,12 @@ export default {
       if (link.includes('https://vk.com') && this.vkAuth.access_token) {
         const pattern = /(?!video)[\d-]+/g;
         const ids = link.match(pattern);
-        const videos = await fetch(
-          `${this.vkApi}video.get?owner_id=${ids[0]}&videos=${ids[1]}&access_token=${this.vkAuth.access_token}&v=5.131`
-        );
+        const videos = VK.Api.call('video.get', {
+          owner_id: ids[0],
+          videos: ids[1],
+          access_token: this.vkAuth.access_token,
+          v: 5.131,
+        });
         console.log('🚀 ~ mounted ~ videos', videos);
         this.vkVideoSrc = videos.items[0].player;
       }
