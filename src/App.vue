@@ -185,16 +185,14 @@ export default {
       });
       console.log('🚀 ~ mounted ~ this.vkAuth', this.vkAuth);
       const link = this.ml.content.video;
-      if (
-        link.includes('https://vk.com') &&
-        this.vkAuth.type === 'VKWebAppAccessTokenReceived'
-      ) {
+      if (link.includes('https://vk.com') && this.vkAuth.access_token) {
         const pattern = /(?!video)[\d-]+/g;
         const ids = link.match(pattern);
         const videos = await fetch(
-          `${vkApi}video.get?owner_id=${ids[0]}&videos=${ids[1]}&access_token=${this.vkAuth.data.access_token}`
+          `${vkApi}video.get?owner_id=${ids[0]}&videos=${ids[1]}&access_token=${this.vkAuth.access_token}`
         );
         console.log('🚀 ~ mounted ~ videos', videos);
+        this.vkVideoSrc = videos.items[0].player;
       }
     },
   },
@@ -214,16 +212,15 @@ export default {
       if (link.includes('https://youtu.be')) {
         result = link.replace('https://youtu.be', this.youtubeUrl) + ytExt;
       }
-      if (link.includes('https://vk.com')) {
+      if (link.includes('https://vk.com') && this.vkVideoSrc) {
         this.isVkVideo = true;
-        link += this.vkVideoHash;
         /*         const width = 'width="630"';
         const height = 'height="356"';
         const wPattern = /width="[\d]+"/gm;
         const hPattern = /height="[\d]+"/gm;
         frame = link.replace(wPattern, width);
         frame = frame.replace(hPattern, height); */
-        result = link;
+        result = this.vkVideoSrc;
       }
       return result;
     },
