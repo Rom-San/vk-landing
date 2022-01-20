@@ -180,6 +180,7 @@ export default {
       this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
       this.vkAuth = await bridge.send('VKWebAppGetAuthToken', {
         app_id: this.vkUserInfo.vk_app_id,
+        scope: '',
       });
       console.log('🚀 ~ mounted ~ this.vkUserInfo', this.vkAuth);
       const link = this.ml.content.video;
