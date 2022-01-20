@@ -4,13 +4,14 @@
       <div class="headline">
         <img v-if="ml.content.image" class="image" :src="getImage" alt="" />
         <iframe
-          v-if="ml.content.video"
+          v-if="ml.content.video && !isVkVideo"
           class="video"
           width="585"
           :src="getVideo"
           frameborder="0"
           allow="autoplay; encrypted-media; fullscreen;"
         ></iframe>
+        <div class="vk-video" v-if="isVkVideo" v-html="vkVideoFrame"></div>
       </div>
       <div class="container">
         <div class="title">{{ getTitle }}</div>
@@ -163,6 +164,8 @@ export default {
       emailAttributes: false,
       vkLink: '',
       agreement: true,
+      isVkVideo: false,
+      vkVideoFrame: '',
     };
   },
   computed: {
@@ -182,8 +185,15 @@ export default {
         result = link.replace('https://youtu.be', this.youtubeUrl) + ytExt;
       }
       if (link.includes('https://vk.com')) {
-        const vkExt = link.replace('https://vk.com/video', '').split('_');
-        result = `${this.vkVideoUrl}${vkExt[0]}&id=${vkExt[1]}`;
+        this.isVkVideo = true;
+        let frame;
+        const width = 'width="530"';
+        const height = 'height="300"';
+        const wPattern = /width="[\d]+"/gm;
+        const hPattern = /height="[\d]+"/gm;
+        frame = link.replace(wPattern, width);
+        frame = frame.replace(hPattern, height);
+        this.vkVideoFrame = frame;
       }
       return result;
     },
@@ -349,6 +359,11 @@ export default {
         object-fit: cover;
       }
       .video {
+        height: 300px;
+        width: 530px;
+        overflow: hidden;
+      }
+      vk-video {
         height: 300px;
         width: 530px;
         overflow: hidden;
