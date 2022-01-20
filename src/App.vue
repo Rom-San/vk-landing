@@ -189,7 +189,7 @@ export default {
         const pattern = /(?!video)[\d-]+/g;
         const ids = link.match(pattern);
         const videos = await fetch(
-          `${vkApi}video.get?owner_id=${ids[0]}&videos=${ids[1]}&access_token=${this.vkAuth.access_token}`
+          `${this.vkApi}video.get?owner_id=${ids[0]}&videos=${ids[1]}&access_token=${this.vkAuth.access_token}`
         );
         console.log('🚀 ~ mounted ~ videos', videos);
         this.vkVideoSrc = videos.items[0].player;
