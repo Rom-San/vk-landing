@@ -178,11 +178,12 @@ export default {
   watch: {
     async groupId() {
       this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
+      console.log('🚀 ~ vk_app_id', this.vkUserInfo.vk_app_id);
       this.vkAuth = await bridge.send('VKWebAppGetAuthToken', {
-        app_id: this.vkUserInfo.vk_app_id,
+        app_id: parseInt(this.vkUserInfo.vk_app_id),
         scope: '',
       });
-      console.log('🚀 ~ mounted ~ this.vkUserInfo', this.vkAuth);
+      console.log('🚀 ~ mounted ~ this.vkAuth', this.vkAuth);
       const link = this.ml.content.video;
       if (
         link.includes('https://vk.com') &&
