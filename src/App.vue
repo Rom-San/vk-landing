@@ -178,7 +178,7 @@ export default {
   watch: {
     async groupId() {
       this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
-      console.log('🚀 ~ vk_app_id', this.vkUserInfo.vk_app_id);
+      console.log('🚀 ~ vkUserInfo', this.vkUserInfo);
       this.vkAuth = await bridge.send('VKWebAppGetAuthToken', {
         app_id: parseInt(this.vkUserInfo.vk_app_id),
         scope: '',
