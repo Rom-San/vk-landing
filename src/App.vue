@@ -137,13 +137,27 @@ export default {
       }
     }
   },
-  mounted() {
+  async mounted() {
     if (bridge.supports('VKWebAppResizeWindow')) {
       setTimeout(() => {
         const offsetHeight = document.body.offsetHeight;
         const appHeight = offsetHeight < 8050 ? offsetHeight : 8050;
         bridge.send('VKWebAppResizeWindow', { height: appHeight });
       }, 1000);
+    }
+    const allowMessages = await this.allowMessages();
+    if (allowMessages) {
+      this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
+      console.log('🚀 ~ mounted ~ this.vkUserInfo', this.vkUserInfo);
+      const link = this.ml.content.video;
+      if (link.includes('https://vk.com')) {
+        const pattern = /(?!video)[\d-]+/g;
+        const ids = link.match(pattern);
+        const videos = await fetch(
+          `${vkApi}video.get?owner_id=${ids[0]}&videos=${ids[1]}&access_token=${this.vkUserInfo.access_token}`
+        );
+        console.log('🚀 ~ mounted ~ videos', videos);
+      }
     }
   },
   data() {
@@ -155,6 +169,8 @@ export default {
       description: '',
       api: 'https://prosto.bz/api',
       vkUrl: 'https://vk.com/',
+      vkUserInfo: {},
+      vkApi: 'https://api.vk.com/method/',
       youtubeUrl: 'https://www.youtube.com/embed',
       vkVideoUrl: 'https://vk.com/video_ext.php?oid=',
       isInvalidPhone: true,
@@ -167,6 +183,7 @@ export default {
       agreement: true,
       isVkVideo: false,
       vkVideoFrame: '',
+      vkVideoHash: null,
     };
   },
   computed: {
@@ -175,7 +192,7 @@ export default {
         ? `${this.api}/file/${this.ml.content.image[0]}`
         : '';
     },
-    async getVideo() {
+    getVideo() {
       let result;
       const link = this.ml.content.video;
       const ytExt = '?controls=0&modestbranding=1&showinfo=0&rel=0';
@@ -187,14 +204,14 @@ export default {
       }
       if (link.includes('https://vk.com')) {
         this.isVkVideo = true;
-        let frame;
-        const width = 'width="630"';
+        link += this.vkVideoHash;
+        /*         const width = 'width="630"';
         const height = 'height="356"';
         const wPattern = /width="[\d]+"/gm;
         const hPattern = /height="[\d]+"/gm;
         frame = link.replace(wPattern, width);
-        frame = frame.replace(hPattern, height);
-        this.vkVideoFrame = frame;
+        frame = frame.replace(hPattern, height); */
+        result = link;
       }
       return result;
     },
@@ -226,12 +243,13 @@ export default {
       if (!this.isButtonDisabled) {
         try {
           await this.postData();
-          const allowMessages = await this.allowMessages();
-          if (!allowMessages) return;
-          const res = await bridge.send('VKWebAppGetUserInfo');
           await fetch(`${this.api}/vk-user-enter`, {
             method: 'post',
-            body: JSON.stringify({ ...res, ...this.search, ...this.hash }),
+            body: JSON.stringify({
+              ...this.vkUserInfo,
+              ...this.search,
+              ...this.hash,
+            }),
             headers: { 'Content-Type': 'application/json' },
           });
         } catch (error) {
