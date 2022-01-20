@@ -125,6 +125,7 @@ export default {
         this.ml = await response.json();
         this.loader = false;
         document.title = this.ml.content.title;
+        this.groupId = parseInt(this.ml.buttons[0].botIdInSocialNetwork);
         this.setDescription();
         if (this.ml?.additionalOptions.VkPixel) {
           vkPixel(this.ml.additionalOptions.VkPixel);
@@ -145,17 +146,6 @@ export default {
         bridge.send('VKWebAppResizeWindow', { height: appHeight });
       }, 1000);
     }
-    this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
-    console.log('🚀 ~ mounted ~ this.vkUserInfo', this.vkUserInfo);
-    const link = this.ml.content.video;
-    if (link.includes('https://vk.com')) {
-      const pattern = /(?!video)[\d-]+/g;
-      const ids = link.match(pattern);
-      const videos = await fetch(
-        `${vkApi}video.get?owner_id=${ids[0]}&videos=${ids[1]}&access_token=${this.vkUserInfo.access_token}`
-      );
-      console.log('🚀 ~ mounted ~ videos', videos);
-    }
   },
   data() {
     return {
@@ -164,9 +154,11 @@ export default {
       hash: null,
       loader: true,
       description: '',
+      groupId: null,
       api: 'https://prosto.bz/api',
       vkUrl: 'https://vk.com/',
       vkUserInfo: {},
+      vkAuth: {},
       vkApi: 'https://api.vk.com/method/',
       youtubeUrl: 'https://www.youtube.com/embed',
       vkVideoUrl: 'https://vk.com/video_ext.php?oid=',
@@ -182,6 +174,25 @@ export default {
       vkVideoFrame: '',
       vkVideoHash: null,
     };
+  },
+  watch: {
+    async groupId() {
+      this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
+      this.vkAuth = await bridge.send('VKWebAppGetAuthToken');
+      console.log('🚀 ~ mounted ~ this.vkUserInfo', this.vkAuth);
+      const link = this.ml.content.video;
+      if (
+        link.includes('https://vk.com') &&
+        this.vkAuth.type === 'VKWebAppAccessTokenReceived'
+      ) {
+        const pattern = /(?!video)[\d-]+/g;
+        const ids = link.match(pattern);
+        const videos = await fetch(
+          `${vkApi}video.get?owner_id=${ids[0]}&videos=${ids[1]}&access_token=${this.vkAuth.data.access_token}`
+        );
+        console.log('🚀 ~ mounted ~ videos', videos);
+      }
+    },
   },
   computed: {
     getImage() {
@@ -323,12 +334,10 @@ export default {
     },
     async allowMessages() {
       try {
-        const groupId = parseInt(this.ml.buttons[0].botIdInSocialNetwork);
-        console.log('🚀 ~ groupId', groupId);
         const allowMessages = await bridge.send(
           'VKWebAppAllowMessagesFromGroup',
           {
-            group_id: groupId,
+            group_id: this.groupId,
           }
         );
         console.log('🚀 ~ allowMessages', allowMessages);
