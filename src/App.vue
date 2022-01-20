@@ -105,9 +105,8 @@ import { mask } from 'vue-the-mask';
 import PhoneIcon from './assets/images/phone.svg';
 import EmailIcon from './assets/images/mail.svg';
 import bridge from '@vkontakte/vk-bridge';
-import vkPixel from './scripts/vk-pixel';
+import VK from './scripts/vkApi';
 import qs from 'query-string';
-import VK from 'https://vk.com/js/api/openapi.js?169';
 
 export default {
   directives: {
@@ -129,15 +128,14 @@ export default {
         this.groupId = parseInt(this.ml.buttons[0].botIdInSocialNetwork);
         this.setDescription();
         if (this.ml?.additionalOptions.VkPixel) {
-          vkPixel(this.ml.additionalOptions.VkPixel);
+          VK(this.ml.additionalOptions.VkPixel);
         }
-        vkPixel();
+        VK();
       } catch (error) {
         this.ml = null;
         this.loader = false;
         console.log(error.message);
       }
-      VK.init({ apiId: 7831726 });
     }
   },
   async mounted() {
@@ -189,7 +187,7 @@ export default {
       if (link.includes('https://vk.com') && this.vkAuth.access_token) {
         const pattern = /(?!video)[\d-]+/g;
         const ids = link.match(pattern);
-        const videos = VK.Api.call('video.get', {
+        const videos = VK.call('video.get', {
           owner_id: ids[0],
           videos: ids[1],
           access_token: this.vkAuth.access_token,
