@@ -115,6 +115,7 @@ export default {
   async created() {
     this.hash = qs.parse(location.hash);
     this.search = qs.parse(location.search);
+    console.log('🚀 ~ created ~ search', this.search);
     if (!this.hash) {
       this.loader = false;
     } else {
@@ -187,8 +188,8 @@ export default {
       if (link.includes('https://vk.com')) {
         this.isVkVideo = true;
         let frame;
-        const width = 'width="530"';
-        const height = 'height="300"';
+        const width = 'width="630"';
+        const height = 'height="356"';
         const wPattern = /width="[\d]+"/gm;
         const hPattern = /height="[\d]+"/gm;
         frame = link.replace(wPattern, width);
@@ -352,20 +353,20 @@ export default {
     .headline {
       overflow: hidden;
       display: flex;
-      max-height: 300px;
+      min-height: 300px;
       .image {
         width: 100%;
         -o-object-fit: cover;
         object-fit: cover;
       }
       .video {
-        height: 300px;
-        width: 530px;
+        width: 630px;
+        height: 356px;
         overflow: hidden;
       }
-      vk-video {
-        height: 300px;
-        width: 530px;
+      .vk-video {
+        width: 630px;
+        height: 356px;
         overflow: hidden;
       }
     }
