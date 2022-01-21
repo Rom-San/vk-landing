@@ -116,7 +116,7 @@ export default {
   async created() {
     this.hash = qs.parse(location.hash);
     this.search = qs.parse(location.search);
-    console.log('🚀 ~ created', this.hash);
+    console.log('🚀 ~ created', this.search);
     if (!this.hash) {
       this.loader = false;
     } else {
