@@ -105,8 +105,9 @@ import { mask } from 'vue-the-mask';
 import PhoneIcon from './assets/images/phone.svg';
 import EmailIcon from './assets/images/mail.svg';
 import bridge from '@vkontakte/vk-bridge';
-import VK from './scripts/vkApi';
+import VKpixel from './scripts/vk-pixel';
 import qs from 'query-string';
+import VKApi from './scripts/vk-api';
 
 export default {
   directives: {
@@ -115,7 +116,7 @@ export default {
   async created() {
     this.hash = qs.parse(location.hash);
     this.search = qs.parse(location.search);
-    console.log('🚀 ~ created ~ search', this.search);
+    console.log('🚀 ~ created', this.hash);
     if (!this.hash) {
       this.loader = false;
     } else {
@@ -127,10 +128,10 @@ export default {
         document.title = this.ml.content.title;
         this.groupId = parseInt(this.ml.buttons[0].botIdInSocialNetwork);
         this.setDescription();
+        VKApi(this.vkApiId);
         if (this.ml?.additionalOptions.VkPixel) {
-          VK(this.ml.additionalOptions.VkPixel);
+          VKpixel(this.ml.additionalOptions.VkPixel, 7831726);
         }
-        VK();
       } catch (error) {
         this.ml = null;
         this.loader = false;
@@ -155,6 +156,7 @@ export default {
       loader: true,
       description: '',
       groupId: null,
+      vkApiId: 7831726,
       api: 'https://prosto.bz/api',
       vkUrl: 'https://vk.com/',
       vkUserInfo: {},
@@ -176,10 +178,11 @@ export default {
     };
   },
   watch: {
-    async groupId() {
+    async groupId(val) {
+      console.log(val);
       this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
       this.vkAuth = await bridge.send('VKWebAppGetAuthToken', {
-        app_id: 7831726,
+        app_id: this.vkApiId,
         scope: '',
       });
       console.log('🚀 ~ mounted ~ this.vkAuth', this.vkAuth);
@@ -187,7 +190,7 @@ export default {
       if (link.includes('https://vk.com') && this.vkAuth.access_token) {
         const pattern = /(?!video)[\d-]+/g;
         const ids = link.match(pattern);
-        const videos = await VK.call('video.get', {
+        const videos = await VK.api.call('video.get', {
           owner_id: ids[0],
           videos: ids[1],
           access_token: this.vkAuth.access_token,
