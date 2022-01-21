@@ -197,7 +197,7 @@ export default {
           v: 5.131,
         };
         console.log('🚀 ~ params', params);
-        VK.api.call('video.get', params, (r) => {
+        VK.Api.call('video.get', params, (r) => {
           console.log('🚀 ~ videos ~ response', r);
           this.vkVideoSrc = videos.items[0].player;
         });
