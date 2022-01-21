@@ -181,28 +181,24 @@ export default {
     async groupId(val) {
       console.log(val);
       this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
-      this.vkAuth = await bridge.send('VKWebAppGetAuthToken', {
+      /*       this.vkAuth = await bridge.send('VKWebAppGetAuthToken', {
         app_id: this.vkApiId,
         scope: '',
       });
-      console.log('🚀 ~ mounted ~ this.vkAuth', this.vkAuth);
+      console.log('🚀 ~ mounted ~ this.vkAuth', this.vkAuth); */
       const link = this.ml.content.video;
-      if (link.includes('https://vk.com') && this.vkAuth.access_token) {
+      if (link.includes('https://vk.com') && this.search.access_token) {
         const pattern = /(?!video)[\d-]+/g;
         const ids = link.match(pattern);
-        VK.Auth.login((r) => {
-          console.log('🚀 ~ VK.Auth.login ~ r', r);
-          const params = {
-            owner_id: ids[0],
-            videos: ids[1],
-            access_token: this.vkAuth.access_token,
-            v: 5.131,
-          };
-          console.log('🚀 ~ params', params);
-          VK.Api.call('video.get', params, (r) => {
-            console.log('🚀 ~ videos ~ response', r);
-            this.vkVideoSrc = videos.items[0].player;
-          });
+        const params = {
+          owner_id: ids[0],
+          videos: ids[1],
+          access_token: this.search.access_token,
+          v: 5.131,
+        };
+        VK.Api.call('video.get', params, (r) => {
+          console.log('🚀 ~ videos ~ response', r);
+          this.vkVideoSrc = r.items[0].player;
         });
       }
     },
