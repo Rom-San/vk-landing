@@ -190,15 +190,17 @@ export default {
       if (link.includes('https://vk.com') && this.vkAuth.access_token) {
         const pattern = /(?!video)[\d-]+/g;
         const ids = link.match(pattern);
-        console.log('🚀 ~ VK.api', VK.api);
-        const videos = await VK.api.call('video.get', {
+        const params = {
           owner_id: ids[0],
           videos: ids[1],
           access_token: this.vkAuth.access_token,
           v: 5.131,
+        };
+        console.log('🚀 ~ params', params);
+        VK.api.call('video.get', params, (r) => {
+          console.log('🚀 ~ videos ~ response', r);
+          this.vkVideoSrc = videos.items[0].player;
         });
-        console.log('🚀 ~ mounted ~ videos', videos);
-        this.vkVideoSrc = videos.items[0].player;
       }
     },
   },
