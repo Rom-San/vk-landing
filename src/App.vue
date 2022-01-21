@@ -190,6 +190,7 @@ export default {
       if (link.includes('https://vk.com') && this.vkAuth.access_token) {
         const pattern = /(?!video)[\d-]+/g;
         const ids = link.match(pattern);
+        console.log('🚀 ~ VK.api', VK.api);
         const videos = await VK.api.call('video.get', {
           owner_id: ids[0],
           videos: ids[1],
