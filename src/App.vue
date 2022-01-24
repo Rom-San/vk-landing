@@ -196,6 +196,7 @@ export default {
           access_token: this.search.access_token,
           v: 5.131,
         };
+        VK.Auth.login();
         VK.Api.call('video.get', params, (r) => {
           console.log('🚀 ~ videos ~ response', r);
           this.vkVideoSrc = r.items[0].player;
