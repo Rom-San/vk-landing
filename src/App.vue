@@ -330,6 +330,7 @@ export default {
           email: this.email,
           phone: this.phone,
         },
+        tags: this.ml.buttons[0].tags,
       };
       try {
         const response = await fetch(`${this.api}/info`, {
