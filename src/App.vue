@@ -107,7 +107,7 @@ import EmailIcon from './assets/images/mail.svg';
 import bridge from '@vkontakte/vk-bridge';
 import VKpixel from './scripts/vk-pixel';
 import qs from 'query-string';
-import VKApi from './scripts/vk-api';
+//import VKApi from './scripts/vk-api';
 
 export default {
   directives: {
@@ -128,9 +128,9 @@ export default {
         document.title = this.ml.content.title;
         this.groupId = parseInt(this.ml.buttons[0].botIdInSocialNetwork);
         this.setDescription();
-        VKApi(this.vkApiId);
+        //VKApi(this.vkApiId);
         if (this.ml?.additionalOptions.VkPixel) {
-          VKpixel(this.ml.additionalOptions.VkPixel, 7831726);
+          VKpixel('VK-RTRG-1177719-bVOGb'); //this.ml.additionalOptions.VkPixel
         }
       } catch (error) {
         this.ml = null;
