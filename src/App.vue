@@ -181,10 +181,10 @@ export default {
     async groupId(val) {
       console.log(val);
       this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
-      this.vkAuth = await bridge.send('VKWebAppGetAuthToken', {
+      /*       this.vkAuth = await bridge.send('VKWebAppGetAuthToken', {
         app_id: this.vkApiId,
         scope: '',
-      });
+      }); 
       console.log('🚀 ~ mounted ~ this.vkAuth', this.vkAuth);
       const link = this.ml.content.video;
       if (link.includes('https://vk.com') && this.vkAuth.access_token) {
@@ -201,7 +201,7 @@ export default {
           console.log('🚀 ~ videos ~ response', r);
           this.vkVideoSrc = r.items[0].player;
         });
-      }
+      }*/
     },
   },
   computed: {
@@ -228,7 +228,7 @@ export default {
         const hPattern = /height="[\d]+"/gm;
         frame = link.replace(wPattern, width);
         frame = frame.replace(hPattern, height); */
-        result = this.vkVideoSrc;
+        result = link;
       }
       return result;
     },
