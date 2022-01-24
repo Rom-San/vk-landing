@@ -107,7 +107,7 @@ import EmailIcon from './assets/images/mail.svg';
 import bridge from '@vkontakte/vk-bridge';
 import VKpixel from './scripts/vk-pixel';
 import qs from 'query-string';
-//import VKApi from './scripts/vk-api';
+import VKApi from './scripts/vk-api';
 
 export default {
   directives: {
@@ -128,9 +128,9 @@ export default {
         document.title = this.ml.content.title;
         this.groupId = parseInt(this.ml.buttons[0].botIdInSocialNetwork);
         this.setDescription();
-        //VKApi(this.vkApiId);
+        VKApi(this.vkApiId);
         if (this.ml?.additionalOptions.VkPixel) {
-          VKpixel('VK-RTRG-1177719-bVOGb'); //this.ml.additionalOptions.VkPixel
+          VKpixel(this.ml.additionalOptions.VkPixel);
         }
       } catch (error) {
         this.ml = null;
@@ -181,13 +181,13 @@ export default {
     async groupId(val) {
       console.log(val);
       this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
-      /*       this.vkAuth = await bridge.send('VKWebAppGetAuthToken', {
+      this.vkAuth = await bridge.send('VKWebAppGetAuthToken', {
         app_id: this.vkApiId,
         scope: '',
       });
-      console.log('🚀 ~ mounted ~ this.vkAuth', this.vkAuth); */
+      console.log('🚀 ~ mounted ~ this.vkAuth', this.vkAuth);
       const link = this.ml.content.video;
-      if (link.includes('https://vk.com') && this.search.access_token) {
+      if (link.includes('https://vk.com') && this.vkAuth.access_token) {
         const pattern = /(?!video)[\d-]+/g;
         const ids = link.match(pattern);
         const params = {
