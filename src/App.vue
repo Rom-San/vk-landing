@@ -117,8 +117,9 @@ export default {
     this.hash = qs.parse(location.hash);
     this.search = qs.parse(location.search);
     console.log('🚀 ~ created', this.search);
-    if (!this.hash) {
+    if (!this.hash?.ml) {
       this.loader = false;
+      window.top.location.href = 'https://vk.com/im?sel=-' + this.hash.group;
     } else {
       const uid = this.hash.ml;
       try {
