@@ -118,7 +118,8 @@ export default {
     this.search = qs.parse(location.search);
     console.log('🚀 ~ created', this.search);
     if (!this.hash?.ml) {
-      window.top.location.href = 'https://vk.com/im?sel=-' + this.hash.group;
+      const id = this.hash.group;
+      this.enterUser(id);
     } else {
       const uid = this.hash.ml;
       try {
@@ -140,6 +141,7 @@ export default {
     }
   },
   async mounted() {
+    this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
     if (bridge.supports('VKWebAppResizeWindow')) {
       setTimeout(() => {
         const offsetHeight = document.body.offsetHeight;
@@ -180,7 +182,6 @@ export default {
   watch: {
     async groupId(val) {
       console.log(val);
-      this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
       /*       this.vkAuth = await bridge.send('VKWebAppGetAuthToken', {
         app_id: this.vkApiId,
         scope: '',
@@ -258,23 +259,27 @@ export default {
   methods: {
     async onButton() {
       if (!this.isButtonDisabled) {
-        try {
-          await this.postData();
-          await fetch(`${this.api}/vk-user-enter`, {
-            method: 'post',
-            body: JSON.stringify({
-              ...this.vkUserInfo,
-              ...this.search,
-              ...this.hash,
-            }),
-            headers: { 'Content-Type': 'application/json' },
-          });
-        } catch (error) {
-          console.log('Ошибка:', error);
-        }
-        this.vkLink = `${this.vkUrl}im?sel=-${this.ml.buttons[0].botIdInSocialNetwork}`;
-        window.top.location.href = this.vkLink;
+        await this.postData();
+        const id = this.ml.buttons[0].botIdInSocialNetwork;
+        this.enterUser(id);
       }
+    },
+    async enterUser(id) {
+      try {
+        await fetch(`${this.api}/vk-user-enter`, {
+          method: 'post',
+          body: JSON.stringify({
+            ...this.vkUserInfo,
+            ...this.search,
+            ...this.hash,
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } catch (error) {
+        console.log('Ошибка:', error);
+      }
+      this.vkLink = `${this.vkUrl}im?sel=-${id}`;
+      window.top.location.href = this.vkLink;
     },
     getQuery(href) {
       let result = {};
