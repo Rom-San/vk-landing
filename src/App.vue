@@ -116,7 +116,7 @@ export default {
   async created() {
     this.hash = qs.parse(location.hash);
     this.search = qs.parse(location.search);
-    console.log('🚀 ~ created', this.search);
+    this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
     if (!this.hash?.ml) {
       const id = this.hash.group;
       this.enterUser(id);
@@ -141,7 +141,6 @@ export default {
     }
   },
   async mounted() {
-    this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
     if (bridge.supports('VKWebAppResizeWindow')) {
       setTimeout(() => {
         const offsetHeight = document.body.offsetHeight;
