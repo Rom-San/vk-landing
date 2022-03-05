@@ -279,7 +279,8 @@ export default {
         console.log('Ошибка:', error);
       }
       this.vkLink = `${this.vkUrl}im?sel=-${id}`;
-      window.top.location.href = this.vkLink;
+      console.log('🚀 ~ enterUser ~ this.vkLink', this.vkLink);
+      //window.top.location.href = this.vkLink;
     },
     getQuery(href) {
       let result = {};
