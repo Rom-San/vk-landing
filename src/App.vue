@@ -279,7 +279,7 @@ export default {
       }
       this.vkLink = `${this.vkUrl}im?sel=-${id}`;
       console.log('🚀 ~ enterUser ~ this.vkLink', this.vkLink);
-      window.top.location.href = this.vkLink;
+      //window.top.location.href = this.vkLink;
     },
     getQuery(href) {
       let result = {};
