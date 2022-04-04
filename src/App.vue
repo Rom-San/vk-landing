@@ -172,7 +172,7 @@ export default {
       description: '',
       groupId: null,
       vkApiId: 7831726,
-      api: 'https://develop.dev.prosto.bz/api',
+      api: 'https://prosto.bz/api',
       vkUrl: 'https://vk.com/',
       vkUserInfo: {},
       vkAuth: {},
