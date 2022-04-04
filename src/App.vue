@@ -172,7 +172,7 @@ export default {
       description: '',
       groupId: null,
       vkApiId: 7831726,
-      api: 'https://prosto.bz/api',
+      api: 'https://prosto.bz/api', //develop.dev.
       vkUrl: 'https://vk.com/',
       vkUserInfo: {},
       vkAuth: {},
@@ -404,22 +404,15 @@ export default {
   color: #333;
   background-color: #edeef0;
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  overflow: auto;
+  padding: 24px 0;
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
   .minilanding {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow: auto;
     color: #000;
     background-color: #ffffff;
     border-radius: 16px;
+    overflow: hidden;
     max-width: 585px;
     box-sizing: border-box;
     margin: auto;
