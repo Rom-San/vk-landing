@@ -1,7 +1,10 @@
 <template>
-  <div class="wrapper" v-if="!loader && ml">
-    <div class="minilanding">
-      <div class="headline">
+  <div class="wrapper" v-if="!loader && ml" :style="previewStyle">
+    <div
+      class="minilanding"
+      :class="{ wide: ml?.content?.pageFormat === 'fullscreen' }"
+    >
+      <div class="headline" v-if="ml?.content?.pageFormat !== 'fullscreen'">
         <img v-if="ml.content.image" class="image" :src="getImage" alt="" />
         <iframe
           v-if="ml.content.video && !isVkVideo"
@@ -14,9 +17,9 @@
         <div class="vk-video" v-if="isVkVideo" v-html="vkVideoFrame"></div>
       </div>
       <div class="container">
-        <div class="title">{{ getTitle }}</div>
+        <div class="title" :style="titleStyle">{{ getTitle }}</div>
         <div class="content">
-          <div class="text">{{ getText }}</div>
+          <div class="text" :style="textStyle">{{ getText }}</div>
           <form class="form">
             <div
               v-if="
@@ -25,6 +28,7 @@
                   ml.additionalOptions.showEmail)
               "
               class="label"
+              :style="textStyle"
             >
               Обязательные поля для заполнения
             </div>
@@ -42,6 +46,7 @@
                 @input="onInputPhone"
                 @change="onChangePhone"
                 placeholder="Ведите Ваш номер телефона"
+                :style="textStyle"
               />
             </div>
             <div
@@ -56,6 +61,7 @@
                 @input="onInputEmail"
                 @change="onChangeEmail"
                 placeholder="Ведите Ваш емейл"
+                :style="textStyle"
               />
             </div>
           </form>
@@ -78,14 +84,20 @@
         </div>
       </div>
       <div class="footer">
-        <div class="agreement" :class="{ 'not-agreement': !agreement }">
-          <input type="checkbox" v-model="agreement" />
-          Вы соглашаетесь с&nbsp;
-          <a href="https://prostolp.com/policy.pdf" target="_blank">
-            Условиями использования и Политикой конфиденциальности</a
-          >
+        <div
+          class="agreement"
+          :class="{ 'not-agreement': !agreement }"
+          :style="textStyle"
+        >
+          <input name="agreement" type="checkbox" v-model="agreement" />
+          <label for="agreement" :style="textStyle">
+            Вы соглашаетесь с&nbsp;
+            <a href="https://prostolp.com/policy.pdf" target="_blank">
+              Условиями использования и Политикой конфиденциальности</a
+            >
+          </label>
         </div>
-        <div class="made-in">
+        <div class="made-in" :style="textStyle">
           Сделано на платформе
           <a href="http://prosto.bz" target="_blank">prosto.bz</a>
         </div>
@@ -116,12 +128,14 @@ export default {
   async created() {
     this.hash = qs.parse(location.hash);
     this.search = qs.parse(location.search);
-    this.vkUserInfo = await bridge.send('VKWebAppGetUserInfo');
+    this.vkUserInfo = bridge.send('VKWebAppGetUserInfo');
     if (!this.hash?.ml) {
       const id = this.hash.group;
+      console.log('🚀 ~ created ~ id', id);
       this.enterUser(id);
     } else {
       const uid = this.hash.ml;
+      console.log('🚀 ~ created ~ uid', uid);
       try {
         const response = await fetch(`${this.api}/mini-landing/${uid}`);
         this.ml = await response.json();
@@ -158,7 +172,7 @@ export default {
       description: '',
       groupId: null,
       vkApiId: 7831726,
-      api: 'https://prosto.bz/api',
+      api: 'https://develop.dev.prosto.bz/api',
       vkUrl: 'https://vk.com/',
       vkUserInfo: {},
       vkAuth: {},
@@ -205,6 +219,23 @@ export default {
     },
   },
   computed: {
+    previewStyle() {
+      return this.ml?.content?.pageFormat === 'fullscreen'
+        ? this.ml?.content?.image
+          ? `background-image: url('${this.api}/file/${this.ml.content.image[0]}')`
+          : `background: ${this.ml.content.backgroundColor}`
+        : `background: ${this.ml.content.backgroundColor}`;
+    },
+    titleStyle() {
+      return this.ml?.content?.titleColor
+        ? `color: ${this.ml.content.titleColor}`
+        : 'color: #686FB0';
+    },
+    textStyle() {
+      return this.ml?.content?.textColor
+        ? `color: ${this.ml.content.textColor}`
+        : 'color: #574E72';
+    },
     getImage() {
       return this.ml.content
         ? `${this.api}/file/${this.ml.content.image[0]}`
@@ -370,32 +401,37 @@ export default {
 @import './assets/styles/loader.scss';
 .wrapper {
   box-sizing: border-box;
-  font-size: 16px;
-  line-height: 1;
   color: #333;
   background-color: #edeef0;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
+  overflow: auto;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
   .minilanding {
     display: flex;
     flex-direction: column;
     align-items: center;
     overflow: auto;
     color: #000;
+    background-color: #ffffff;
     border-radius: 16px;
-    width: 100%;
-    background-color: #fff;
+    max-width: 585px;
     box-sizing: border-box;
+    margin: auto;
+    &.wide {
+      width: 407px;
+      background: hsla(0, 0%, 0%, 0.3);
+    }
     .headline {
       overflow: hidden;
       display: flex;
-      min-height: 300px;
       .image {
         width: 100%;
-        -o-object-fit: cover;
-        object-fit: cover;
       }
       .video {
         width: 630px;
@@ -459,6 +495,10 @@ export default {
               outline: none;
               font-size: 13px;
               width: 100%;
+              background-color: rgba(0, 0, 0, 0);
+              &::placeholder {
+                color: #41a8f2;
+              }
             }
           }
         }
@@ -496,7 +536,6 @@ export default {
       }
     }
     .footer {
-      width: 100%;
       display: flex;
       border-top: 1px solid #b3cce2;
       flex-direction: column;
