@@ -131,11 +131,9 @@ export default {
     this.vkUserInfo = bridge.send('VKWebAppGetUserInfo');
     if (!this.hash?.ml) {
       const id = this.hash.group;
-      console.log('🚀 ~ created ~ id', id);
       this.enterUser(id);
     } else {
       const uid = this.hash.ml;
-      console.log('🚀 ~ created ~ uid', uid);
       try {
         const response = await fetch(`${this.api}/mini-landing/${uid}`);
         this.ml = await response.json();
@@ -287,8 +285,13 @@ export default {
     },
   },
   methods: {
+    sendClick() {
+      const url = `${this.api}/mini-landing/${this.hash.ml}/vk`;
+      fetch(url, { method: 'PATCH' });
+    },
     async onButton() {
       if (!this.isButtonDisabled) {
+        this.sendClick();
         await this.postData();
         const id = this.ml.buttons[0].botIdInSocialNetwork;
         this.enterUser(id);
