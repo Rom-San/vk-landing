@@ -127,7 +127,6 @@ export default {
   },
   async created() {
     this.hash = qs.parse(location.hash);
-    console.log('🚀 ~ created ~ this.hash', this.hash);
     this.search = qs.parse(location.search);
     this.vkUserInfo = bridge.send('VKWebAppGetUserInfo');
     this.api = this.hash.stage
@@ -316,7 +315,6 @@ export default {
       }
     },
     async enterUser(id) {
-      console.log('🚀 ~ enterUser ~ this.api', this.api);
       try {
         await fetch(`${this.api}/vk-user-enter`, {
           method: 'post',
@@ -331,7 +329,7 @@ export default {
         console.log('Ошибка:', error);
       }
       this.vkLink = `${this.vkUrl}im?sel=-${id}`;
-      //window.top.location.href = this.vkLink;
+      window.top.location.href = this.vkLink;
     },
     getQuery(href) {
       let result = {};
