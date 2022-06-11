@@ -315,6 +315,7 @@ export default {
       }
     },
     async enterUser(id) {
+      console.log('🚀 ~ enterUser ~ this.api', this.api);
       try {
         await fetch(`${this.api}/vk-user-enter`, {
           method: 'post',
@@ -329,7 +330,7 @@ export default {
         console.log('Ошибка:', error);
       }
       this.vkLink = `${this.vkUrl}im?sel=-${id}`;
-      window.top.location.href = this.vkLink;
+      //window.top.location.href = this.vkLink;
     },
     getQuery(href) {
       let result = {};
