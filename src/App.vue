@@ -129,6 +129,9 @@ export default {
     this.hash = qs.parse(location.hash);
     this.search = qs.parse(location.search);
     this.vkUserInfo = bridge.send('VKWebAppGetUserInfo');
+    this.api = this.hash.stage
+      ? this.getApiFromStage(this.hash.stage)
+      : 'https://prosto.bz/api';
     if (!this.hash?.ml) {
       const id = this.hash.group;
       this.enterUser(id);
@@ -170,7 +173,7 @@ export default {
       description: '',
       groupId: null,
       vkApiId: 7831726,
-      api: 'https://prosto.bz/api', //develop.dev.
+      api: null,
       vkUrl: 'https://vk.com/',
       vkUserInfo: {},
       vkAuth: {},
@@ -285,6 +288,20 @@ export default {
     },
   },
   methods: {
+    getApiFromStage(stage) {
+      let apiUrl = null;
+      switch (stage) {
+        case 1:
+          apiUrl = 'https://develop.dev.prosto.bz/api';
+          break;
+        case 2 || 3:
+          apiUrl = 'http://localhost:3000/api';
+          break;
+        default:
+          break;
+      }
+      return apiUrl;
+    },
     sendClick() {
       const url = `${this.api}/mini-landing/${this.hash.ml}/vk`;
       fetch(url, { method: 'PATCH' });
