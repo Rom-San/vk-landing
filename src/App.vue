@@ -294,7 +294,7 @@ export default {
         case 1:
           apiUrl = 'https://develop.dev.prosto.bz/api';
           break;
-        case 2 || 3:
+        case 2:
           apiUrl = 'http://localhost:3000/api';
           break;
         default:
