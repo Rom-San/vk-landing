@@ -127,6 +127,7 @@ export default {
   },
   async created() {
     this.hash = qs.parse(location.hash);
+    console.log('🚀 ~ created ~ this.hash', this.hash);
     this.search = qs.parse(location.search);
     this.vkUserInfo = bridge.send('VKWebAppGetUserInfo');
     this.api = this.hash.stage
@@ -291,10 +292,10 @@ export default {
     getApiFromStage(stage) {
       let apiUrl = null;
       switch (stage) {
-        case 1:
+        case '1':
           apiUrl = 'https://develop.dev.prosto.bz/api';
           break;
-        case 2:
+        case '2':
           apiUrl = 'http://localhost:3000/api';
           break;
         default:
